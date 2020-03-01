@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1><a href="{{ url_for('file.index') }}">{% block title %}Files{% endblock %}</a></h1>
+  {% if g.user %}
+    <a class="action" href="{{ url_for('file.create') }}">New</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+    <article class="file">
+      <header>
+        <div>
+          <h1>{{ file['id'] }}. {{ file['name'] }}</h1>
+	  <h4>check level: {{ file['check_level'] }} <a href="{{ url_for('file.reset_level', file_id=file['id']) }}"><button>reset</button></a></h4>
+          <div class="about">by {{ file['username'] }} {{ file['user_id'] }} on {{ file['created'].strftime('%Y-%m-%d') }}</div>
+        </div>
+        {% if g.user['id'] == file['user_id'] %}
+        <a class="action" href="{{ url_for('file.update', file_id=file['id']) }}">Edit</a>
+        {% endif %}
+      </header>
+      <div class="image"><img src="{{ url_for('resource.get_image_url', path=file['path']) }}"></div>
+      <div class="image"><img src="{{ url_for('resource.get_located_image_url', path=file['path']) }}"></div>
+      <h2>detected face</h2>
+      <div>
+      {% for thumb in thumbs %}
+      <span class="thumb_div">
+	<!-- <div> -->
+	  <img class="thumb" src="{{ url_for('resource.get_image_url', path=thumb['thumb_path']) }}">
+	<!-- </div> -->
+	<!-- <div class="thumb_label">{% if thumb['clsuter_name'] %}{{ thumb['cluster_name'] }}{% else %}Unknown{% endif %}</div> -->
+      </span>
+      {% endfor %}
+      </div>
+    </article>
+{% endblock %}
