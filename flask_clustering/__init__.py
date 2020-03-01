@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, url_for, redirect
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -20,7 +20,7 @@ def create_app(test_config=None):
 
     @app.route('/')
     def index():
-        return 'Hello, World!'
+        return redirect(url_for('file.index'))
 
     from . import db
     db.init_app(app)
@@ -33,7 +33,5 @@ def create_app(test_config=None):
 
     from . import resource
     app.register_blueprint(resource.bp)
-    
-    app.add_url_rule('/', endpoint='hello')
     
     return app
