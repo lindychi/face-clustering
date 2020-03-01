@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1><a href="{{ url_for('file.index') }}">{% block title %}Files{% endblock %}</a></h1>
+  <h1>{% block title %}<a href="{{ url_for('file.index') }}">< back</a>{% endblock %}</h1>
   {% if g.user %}
     <a class="action" href="{{ url_for('file.create') }}">New</a>
   {% endif %}

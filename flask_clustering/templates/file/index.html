@@ -1,29 +1,25 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Files{% endblock %}</h1>
+  <h1>{% block title %}{% endblock %}</h1>
   {% if g.user %}
     <a class="action" href="{{ url_for('file.create') }}">New</a>
   {% endif %}
 {% endblock %}
 
 {% block content %}
-  {% for file in files %}
-    <article class="file">
-      <header>
-        <div>
-          <a href="{{ url_for('file.file_detail', file_id=file['id']) }}"><h1>{{ file['name'] }}</h1></a>
-          <div class="about">by {{ file['username'] }} on {{ file['created'].strftime('%Y-%m-%d %H:%M:%S') }}</div>
-        </div>
-        {% if g.user['id'] == file['user_id'] %}
-          <a class="action" href="{{ url_for('file.update', file_id=file['id']) }}">Edit</a>
-        {% endif %}
-      </header>
-      <p class="path">{{ file['path'] }}</p>
-      <p class="image"><img src="{{ url_for('resource.get_image_url', path=file['path']) }}"></p>
-    </article>
-    {% if not loop.last %}
-      <hr>
-    {% endif %}
+    {% for file in files %}
+<!-- </div> -->
+<!-- <div class="about">{{ file['created'].strftime('%Y-%m-%d %H:%M:%S') }}</br> -->
+    <!-- <article class="file"> -->
+      <!-- <header> -->
+        <!-- <div> -->
+	<!-- </div> -->
+      <!-- </header> -->
+      <span class="image"><a href="{{ url_for('file.file_detail', file_id=file['id']) }}"><img class="list_img" src="{{ url_for('resource.get_image_url', path=file['path']) }}"></a></span>
+    <!-- </article> -->
+    <!-- {% if not loop.last %} -->
+    <!--   <hr> -->
+    <!-- {% endif %} -->
   {% endfor %}
 {% endblock %}
