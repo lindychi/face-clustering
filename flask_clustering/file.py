@@ -127,3 +127,11 @@ def reset_level(file_id):
     db.execute('UPDATE file SET check_level = 0 WHERE id = ?', (file_id,))
     db.commit()
     return redirect(url_for('file.file_detail', file_id=file_id))
+
+@bp.route('/cluster')
+@login_required
+def clustering():
+    c = cluster.Cluster()
+    return c.get_encoding_from_files()
+    # c.cluster()
+    

@@ -7,17 +7,76 @@ from flask_clustering.db import get_db
 class thumbnail_path_gen():
     def __init__(self, user_id, file_id, file_path):
         self.thumbnail_token = ("/home/hanchi/work/face_clustering/flask_clustering/thumbnail",
-                           str(user_id)+"_"+str(file_id),
-                           os.path.splitext(file_path)[1])
+                                str(user_id)+"_"+str(file_id),
+                                os.path.splitext(file_path)[1])
 
     def get_index_path(self, index):
         return os.path.join(self.thumbnail_token[0],
                             self.thumbnail_token[1]+"_"+str(index)+self.thumbnail_token[2])
-        
+
+class Face():
+    def __init__(self, path, index, box, encoding):
+        self.path = path
+        self.index = index
+        self.box = box
+        self.encoding = encoding
+
+    def get_file_name(self):
+        (file,ext) = os.path.splitext(os.path.basename(self.path))
+        return file+"-"+str(self.index)+ext
+    
+class Cluster():
+    def __init__(self):
+        self.faces = []
+    
+    def get_encoding_from_files(self):
+        db = get_db()
+        paths = db.execute('SELECT path FROM file').fetchall()
+        for p in paths:
+            img = face_recognition.load_image_file(p['path'])
+            boxes = face_recognition.face_locations(img, model="cnn")
+
+            if not boxes:
+                continue
+            
+            encodings = face_recognition.face_encodings(img, boxes)
+
+            faces = []
+            i = 0
+            for box, encoding in zip(boxes, encodings):
+                face = Face(p, i, box, encoding)
+                faces.append(face)
+                i = i + 1
+
+            self.faces.extend(faces)
+        return len(paths)
+
+    def cluster(self):
+        clt = DBSCAN(metric="euclidean")
+        clt.fit(self.face_encodings)
+
+        label_ids = np.unique(clt.labels_)
+        num_unique_faces = len(np.where(label_ids > -1)[0])
+
+        os.system("rm -rf /home/hanchi/work/face_clustering/flask_clustering/cluster/ID*")
+        for label_id in label_ids:
+            dir_name = "/home/hanchi/work/face_clustering/flask_clustering/cluster/ID%d" % label_id
+            os.mkdir(dir_name)
+
+            indexes = np.where(clt.labels_ == label_id)[0]
+
+            for i in indexes:
+                box = self.faces[i].box
+                path = self.faces[i].path
+                img = cv2.imread(path)
+                face_img = self.getFaceImage(img, box)
+                cv2.imwrite(dir_name+self.faces[i].get_file_name())
+
+    
 def make_thumbnail(user_id, file_id, file_path):
     tpg = thumbnail_path_gen(user_id, file_id, file_path)
     npa = load_numpy_array(file_path)
-    boxes = face_recognition.face_locations(npa)
+    boxes = face_recognition.face_locations(npa, model='cnn')
     
     for i in range(len(boxes)):
         cv2.imwrite(tpg.get_index_path(i),
