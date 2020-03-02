@@ -11,11 +11,11 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
+    error = None
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         db = get_db()
-        error = None
 
         if not username:
             error = 'Username is required.'
@@ -32,19 +32,16 @@ def register():
                 (username, generate_password_hash(password))
             )
             db.commit()
-            return redirect(url_for('auth.login'))
-
-        flash(error)
-
-    return render_template('auth/register.html')
+            return redirect(url_for('file.index'))
+    return render_template('auth/register.html', error=error)
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
+    error = None
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         db = get_db()
-        error = None
         user = db.execute(
             'SELECT * FROM user WHERE username = ?', (username,)
         ).fetchone()
@@ -58,10 +55,7 @@ def login():
             session.clear()
             session['user_id'] = user['id']
             return redirect(url_for('file.index'))
-
-        flash(error)
-
-    return render_template('auth/login.html')
+    return render_template('auth/login.html', error=error)
 
 @bp.before_app_request
 def load_logged_in_user():
