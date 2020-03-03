@@ -3,23 +3,23 @@
 {% block header %}
   <h1>{% block title %}{% endblock %}</h1>
   {% if g.user %}
+    <a class="action" href="{{ url_for('asyn_path.index') }}">Asyn path</a>
     <a class="action" href="{{ url_for('file.create') }}">New</a>
   {% endif %}
 {% endblock %}
 
 {% block content %}
+    <div class="page_nation">
+	{% for c in count %}
+	<span><a href="{{ url_for('file.index_page', page_index=c) }}">{{c}}</a></span>
+	{% endfor %}
+    </div>
     {% for file in files %}
-<!-- </div> -->
-<!-- <div class="about">{{ file['created'].strftime('%Y-%m-%d %H:%M:%S') }}</br> -->
-    <!-- <article class="file"> -->
-      <!-- <header> -->
-        <!-- <div> -->
-	<!-- </div> -->
-      <!-- </header> -->
-      <span class="image"><a href="{{ url_for('file.file_detail', file_id=file['id']) }}"><img class="list_img" src="{{ url_for('resource.get_image_url', path=file['path']) }}"></a></span>
-    <!-- </article> -->
-    <!-- {% if not loop.last %} -->
-    <!--   <hr> -->
-    <!-- {% endif %} -->
+    <span class="image">
+	<a href="{{ url_for('file.file_detail', file_id=file['id']) }}">
+	    <img class="list_img level_{{ file.check_level }}" src="{{ url_for('resource.get_image_url', path=file['path']) }}">
+	</a>
+    </span>
   {% endfor %}
 {% endblock %}
+    

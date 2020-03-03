@@ -59,3 +59,20 @@ color: #000000;
 .list_img {
     height: 300px;
 }
+
+.paganation {
+    align-items: center;
+    text-align: center;
+}
+
+.level_0 {
+    border: 2px solid red;
+}
+
+.level_1 {
+    border: 2px solid yellow;
+}
+
+.level_2 {
+    border: 2px solid green;
+}

@@ -1,7 +1,13 @@
 import os
 import face_recognition
 import cv2
+import datetime
 
+from flask import (
+    g
+)
+
+from . import file
 from flask_clustering.db import get_db
 
 class thumbnail_path_gen():
@@ -13,7 +19,78 @@ class thumbnail_path_gen():
     def get_index_path(self, index):
         return os.path.join(self.thumbnail_token[0],
                             self.thumbnail_token[1]+"_"+str(index)+self.thumbnail_token[2])
-        
+
+def bulk_thumbnail(db=None):
+    files = file.get_files_in_level(0)
+    if not db:
+        db = get_db()
+
+    fcount = 0
+    last_commit_time = datetime.datetime.now()
+    for f in files:
+        tpg = thumbnail_path_gen(g.user['id'], f['id'], f['path'])
+        npa = load_numpy_array(f['path'])
+        boxes = face_recognition.face_locations(npa)
+        for i in range(len(boxes)):
+            cv2.imwrite(tpg.get_index_path(i),
+                        get_face_array(npa[:, :, ::-1], boxes[i]))
+            (top, right, bottom, left) = boxes[i]
+            db.execute(
+                'INSERT INTO'
+                ' face (user_id, file_id, face_index, top, right, bottom, left, origin_path, thumb_path)'
+                ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                (g.user['id'], f['id'], i, top, right, bottom, left, f['path'], tpg.get_index_path(i))
+            )
+
+        check_level = 1
+        if len(boxes) > 0:
+            check_level = 2
+
+        db.execute(
+            'UPDATE file SET check_level = ?'
+            ' WHERE id = ?',
+            (check_level, f['id'])
+        )
+
+        if (datetime.datetime.now() - last_commit_time).total_seconds() > 10:
+            last_commit_time = datetime.datetime.now()
+            db.commit()
+        fcount += 1
+
+    db.commit()
+
+    
+def bulk_thumbnail_query(db=None):
+    files = file.get_files_in_level(0)
+    if not db:
+        db = get_db()
+    
+    for f in files:
+        tpg = thumbnail_path_gen(g.user['id'], f['id'], f['path'])
+        npa = load_numpy_array(f['path'])
+        boxes = face_recognition.face_locations(npa)
+        for i in range(len(boxes)):
+            (top, right, bottom, left) = boxes[i]
+            db.execute(
+                'INSERT INTO'
+                ' face (user_id, file_id, face_index, top, right, bottom, left, origin_path, thumb_path)'
+                ' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                (g.user['id'], f['id'], i, top, right, bottom, left, f['path'], tpg.get_index_path(i))
+            )
+
+    db.commit()
+
+def bulk_thumbnail_image(db=None):
+    files = file.get_files_in_level(0)
+
+    for f in files:
+        tpg = thumbnail_path_gen(g.user['id'], f['id'], f['path'])
+        npa = load_numpy_array(f['path'])
+        boxes = face_recognition.face_locations(npa)
+        for i in range(len(boxes)):
+            cv2.imwrite(tpg.get_index_path(i),
+                        get_face_array(npa[:, :, ::-1], boxes[i]))
+    
 def make_thumbnail(user_id, file_id, file_path):
     tpg = thumbnail_path_gen(user_id, file_id, file_path)
     npa = load_numpy_array(file_path)

@@ -20,7 +20,7 @@
         {% endif %}
       </header>
       <div class="image"><img src="{{ url_for('resource.get_image_url', path=file['path']) }}"></div>
-      <div class="image"><img src="{{ url_for('resource.get_located_image_url', path=file['path']) }}"></div>
+      <!-- <div class="image"><img src="{{ url_for('resource.get_located_image_url', path=file['path']) }}"></div> -->
       <h2>detected face</h2>
       <div>
       {% for thumb in thumbs %}

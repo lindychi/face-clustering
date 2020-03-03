@@ -33,5 +33,8 @@ def create_app(test_config=None):
 
     from . import resource
     app.register_blueprint(resource.bp)
-    
+
+    from . import asyn_path
+    app.register_blueprint(asyn_path.bp)
+
     return app
