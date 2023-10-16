@@ -1,7 +1,7 @@
 from app import app, db
 from app.models import User
 import face_recognition
-from flask import request, render_template
+from flask import request, render_template, redirect, url_for
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -15,3 +15,15 @@ def login():
         else:
             return "Invalid username or password"
     return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        new_user = User(username=username)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('login'))
+    return render_template('register.html')

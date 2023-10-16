@@ -3,7 +3,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    face_encoding = db.Column(db.PickleType, nullable=False)
     password_hash = db.Column(db.String(128))
 
     def __repr__(self):
